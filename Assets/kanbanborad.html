@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="estilos.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero Kanban</title>
+</head>
+<body>
+    
+    <script src="drag.js" defer></script>
+    <script src="todo.js" defer></script>
+
+
+    <div class="board">
+        <form id="todo-form">
+            <input type="text" placeholder="Ingresa tu nombre" id="name-input" />       
+            <input type="text" placeholder="Nuevo TODO..." id="todo-input">
+            <button type="submit">Agregar</button>
+        </form>
+        <div class="lanes">
+            <div class="swim-lane" id="todo-lane">
+                <h2 class="heading">TO DO</h2>
+
+                <p class="task" draggable="true">Escuchar musica</p>
+                <p class="task" draggable="true">Investigar como hacer reportes en PDF</p>
+                <p class="task" draggable="true">Investigar como hacer carga masiva</p>
+                <p class="task" draggable="true">Investigar como hacer carga masiva</p>
+
+            </div>
+            <div class="swim-lane">
+                <h2 class="heading">DOING</h2>
+                <p class="task" draggable="true">Escuchar musica</p>
+                <p class="task" draggable="true">Investigar como hacer reportes en PDF</p>
+                <p class="task" draggable="true">Investigar como hacer carga masiva</p>
+            </div>
+            <div class="swim-lane">
+                <h2 class="heading">DONE</h2>
+                <p class="task" draggable="true">Escuchar musica</p>
+                <p class="task" draggable="true">Investigar como hacer reportes en PDF</p>            
+            </div>
+        </div>
+    </div>
+   
+</body>
+</html>
