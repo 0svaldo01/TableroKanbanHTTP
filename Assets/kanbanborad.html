@@ -16,7 +16,7 @@
         <form id="todo-form">
             <input type="text" placeholder="Ingresa tu nombre" id="name-input" />       
             <input type="text" placeholder="Nuevo TODO..." id="todo-input">
-            <button type="submit">Agregar</button>
+            <button type="submit" id="send-button">Agregar</button>
         </form>
         <div class="lanes">
             <div class="swim-lane" id="todo-lane">
@@ -42,5 +42,23 @@
         </div>
     </div>
    
+    <script>
+
+        let name = document.getElementById("name-input");
+        let todo = document.getElementById("todo-input");
+        let todolist = document.getElementById("todo-lane");
+
+        let enviar = document.getElementById("send-button").addEventListener("click", async function (e)
+        {
+            if (document.forms[0].checkValidity)
+            {
+                let usuario = {nombre}
+            }
+        });
+
+
+
+    </script>
+
 </body>
 </html>
