@@ -6,36 +6,39 @@
              xmlns:local="clr-namespace:TableroKanbanHTTP.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <Grid Background="#6A0DAD">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="75*" />
+            <ColumnDefinition Width="25*" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" ></ColumnDefinition>
-                <ColumnDefinition Width="*" ></ColumnDefinition>
-                <ColumnDefinition Width="*" ></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-            </Grid.RowDefinitions>
-            
-            <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20">TO DO</TextBlock>
-            <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20" Grid.Column="1">DOING</TextBlock>
-            <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20" Grid.Column="2">DONE</TextBlock>
+        <Border BorderBrush="black" BorderThickness="5" CornerRadius="20" Margin="50">
+            <Grid  Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" ></ColumnDefinition>
+                    <ColumnDefinition Width="*" ></ColumnDefinition>
+                    <ColumnDefinition Width="*" ></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
 
-            <ListBox  FontSize="20" Margin="5" Grid.Row="1"></ListBox>
-            <ListBox  FontSize="20" Margin="5" Grid.Row="1" Grid.Column="1"></ListBox>
-            <ListBox  FontSize="20" Margin="5" Grid.Row="1" Grid.Column="2"></ListBox>
-        </Grid>
+                <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20">TO DO</TextBlock>
+                <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20" Grid.Column="1">DOING</TextBlock>
+                <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20" Grid.Column="2">DONE</TextBlock>
+
+                <ListBox BorderBrush="#c53e14" FontSize="20" Margin="5"  Grid.Row="1"></ListBox>
+                <ListBox BorderBrush="#c53e14"  FontSize="20" Margin="5" Grid.Row="1" Grid.Column="1"></ListBox>
+                <ListBox BorderBrush="#c53e14" FontSize="20" Margin="5" Grid.Row="1" Grid.Column="2"></ListBox>
+            </Grid>
+        </Border>
+
 
         <WrapPanel Orientation="Vertical" Grid.Column="1" Margin="50">
             <TextBlock>Usuarios conectados:<Span>10</Span></TextBlock>
 
-            <StackPanel Margin="50">
+            <StackPanel>
             <TextBlock>Tareas totales: <Span>10</Span></TextBlock>
             <TextBlock>Completadas: <Span>10</Span></TextBlock>
             <TextBlock>En progreso: <Span>10</Span></TextBlock>
