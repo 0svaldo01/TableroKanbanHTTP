@@ -8,6 +8,7 @@ namespace TableroKanbanHTTP.Models
 {
     public class ToDoDTO
     {
+        public string Nombre { get; set; } = "";
         public string Titulo { get; set; } = "";
         public int Estado { get; set; }
     }

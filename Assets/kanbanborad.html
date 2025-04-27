@@ -19,25 +19,14 @@
             <button type="submit" id="send-button">Agregar</button>
         </form>
         <div class="lanes">
-            <div class="swim-lane" id="todo-lane">
+            <div class="swim-lane" id="todo-lane" data-valor="1">
                 <h2 class="heading">TO DO</h2>
-
-                <p class="task" draggable="true">Escuchar musica</p>
-                <p class="task" draggable="true">Investigar como hacer reportes en PDF</p>
-                <p class="task" draggable="true">Investigar como hacer carga masiva</p>
-                <p class="task" draggable="true">Investigar como hacer carga masiva</p>
-
             </div>
-            <div class="swim-lane">
+            <div class="swim-lane" data-valor="2">
                 <h2 class="heading">DOING</h2>
-                <p class="task" draggable="true">Escuchar musica</p>
-                <p class="task" draggable="true">Investigar como hacer reportes en PDF</p>
-                <p class="task" draggable="true">Investigar como hacer carga masiva</p>
             </div>
-            <div class="swim-lane">
-                <h2 class="heading">DONE</h2>
-                <p class="task" draggable="true">Escuchar musica</p>
-                <p class="task" draggable="true">Investigar como hacer reportes en PDF</p>            
+            <div class="swim-lane" data-valor="3">
+                <h2 class="heading">DONE</h2>            
             </div>
         </div>
     </div>
@@ -50,10 +39,29 @@
 
         let enviar = document.getElementById("send-button").addEventListener("click", async function (e)
         {
-            if (document.forms[0].checkValidity)
-            {
-                let usuario = {nombre}
+            if (document.forms[0].checkValidity()) {
+                let todo = { Nombre: name.value, Tarea: todo.value, valor: todolist.data-valor };
+
+                try {
+
+                    let response = await fetch("/tablero/tarea", {
+                        method: "POST",
+                        body: JSON.stringify(todo),
+                        headers: {
+                            "content-type": "application/json"
+                        }
+                    });
+
+                }
+                catch (ex) {
+                    console.log(ex);
+                }
+
+
+            } else {
+                document.forms[0].reportValidity();
             }
+
         });
 
 

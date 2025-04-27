@@ -6,44 +6,56 @@
              xmlns:local="clr-namespace:TableroKanbanHTTP.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="#6A0DAD">
+    <Grid Background="MediumPurple">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75*" />
             <ColumnDefinition Width="25*" />
         </Grid.ColumnDefinitions>
-
-        <Border BorderBrush="black" BorderThickness="5" CornerRadius="20" Margin="50">
-            <Grid  Grid.Column="0">
+        
+        <Border Background="#E6E6FA" BorderBrush="Black" BorderThickness="3" CornerRadius="15" Margin="30" Padding="20">
+            <Grid Grid.Column="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" ></ColumnDefinition>
-                    <ColumnDefinition Width="*" ></ColumnDefinition>
-                    <ColumnDefinition Width="*" ></ColumnDefinition>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20">TO DO</TextBlock>
-                <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20" Grid.Column="1">DOING</TextBlock>
-                <TextBlock FontWeight="Black" HorizontalAlignment="Center" Margin="10" FontSize="20" Grid.Column="2">DONE</TextBlock>
+                <TextBlock Text="TO DO"  FontWeight="Bold" HorizontalAlignment="Center" Margin="10" FontSize="24"/>
+                <TextBlock Text="DOING"  FontWeight="Bold" HorizontalAlignment="Center" Margin="10" FontSize="24" Grid.Column="1"/>
+                <TextBlock Text="DONE"  FontWeight="Bold" HorizontalAlignment="Center" Margin="10" FontSize="24" Grid.Column="2"/>
 
-                <ListBox BorderBrush="#c53e14" FontSize="20" Margin="5"  Grid.Row="1"></ListBox>
-                <ListBox BorderBrush="#c53e14"  FontSize="20" Margin="5" Grid.Row="1" Grid.Column="1"></ListBox>
-                <ListBox BorderBrush="#c53e14" FontSize="20" Margin="5" Grid.Row="1" Grid.Column="2"></ListBox>
+       
+                <ListBox BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" 
+                         Padding="5" BorderThickness="2" />
+                <ListBox BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" Grid.Column="1" 
+                         Padding="5" BorderThickness="2" />
+                <ListBox BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" Grid.Column="2" 
+                         Padding="5" BorderThickness="2" />
             </Grid>
         </Border>
 
 
-        <WrapPanel Orientation="Vertical" Grid.Column="1" Margin="50">
-            <TextBlock>Usuarios conectados:<Span>10</Span></TextBlock>
+        <WrapPanel Orientation="Vertical" Grid.Column="1" Margin="30" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto">
+            <Border Background="#E6E6FA" BorderBrush="#6A0DAD" BorderThickness="2" CornerRadius="10" Padding="15" Margin="0 0 0 20">
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" Foreground="#6A0DAD" FontSize="10" Margin="0 0 0 10" >Usuarios conectados: <Span>0</Span></TextBlock>
+                    <ListBox Height="100" Width="100" Background="White" BorderBrush="#D48AA1" BorderThickness="2"/>
+                </StackPanel>
+            </Border>
 
-            <StackPanel>
-            <TextBlock>Tareas totales: <Span>10</Span></TextBlock>
-            <TextBlock>Completadas: <Span>10</Span></TextBlock>
-            <TextBlock>En progreso: <Span>10</Span></TextBlock>
-            <TextBlock>Por hacer: <Span>10</Span></TextBlock>
-            </StackPanel>
+     
+            <Border Background="#E6E6FA" BorderBrush="#6A0DAD" BorderThickness="2" CornerRadius="10" Padding="15">
+                <StackPanel>
+                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">Tareas totales:<Span>0</Span></TextBlock>
+                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">En progreso:<Span>0</Span></TextBlock>
+                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">En progreso: <Span>0</Span></TextBlock>
+                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">En progreso: <Span>0</Span></TextBlock>
+                </StackPanel>
+            </Border>
         </WrapPanel>
     </Grid>
 </UserControl>
