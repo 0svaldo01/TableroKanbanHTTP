@@ -59,37 +59,10 @@ namespace TableroKanbanHTTP.Services
                 }     
 
 
-                if (contexto.Request.HttpMethod == "POST" &&
-                    contexto.Request.RawUrl == "/tablero/tarea")
-                {
-                    byte[] bufferEntrada = new byte[contexto.Request.ContentLength64];
-                    contexto.Request.InputStream.Read(bufferEntrada);
-                    string json = Encoding.UTF8.GetString(bufferEntrada);
-
-                    ToDoDTO? persona = JsonSerializer.Deserialize<ToDoDTO>(json);
-
-                    if (persona != null)
-                    {
-                        TareaRecibida?.Invoke(persona);
-                    }
-
-                    contexto.Response.StatusCode = 200;
-                    contexto.Response.Close();
-
-                }
-
-            }
-
-
-
 
 
         }
 
-        public void Detener()
-        {
-            server.Close();
-        }
 
     }
 
