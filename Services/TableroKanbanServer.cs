@@ -18,7 +18,6 @@ namespace TableroKanbanHTTP.Services
         HttpListener server = new();
 
         public event Action<ToDoDTO>? TareaRecibida;
-        public event Action<ToDoDTO, int> TareaCambiada;
         byte[]? index;
 
         private readonly string assetsPath = "assets";
@@ -120,51 +119,51 @@ namespace TableroKanbanHTTP.Services
 
                         context.Response.Close();
                     }
-                    else if (path == "/tablero/cambio-estado")
-                    {
+                    //else if (path == "/tablero/cambio-estado")
+                    //{
                        
-                        using StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
-                        string json = reader.ReadToEnd();
+                    //    using StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
+                    //    string json = reader.ReadToEnd();
 
-                        try
-                        {
-                            using JsonDocument doc = JsonDocument.Parse(json);
-                            JsonElement root = doc.RootElement;
+                    //    try
+                    //    {
+                    //        using JsonDocument doc = JsonDocument.Parse(json);
+                    //        JsonElement root = doc.RootElement;
 
-                            if (root.TryGetProperty("tarea", out JsonElement tareaElement) &&
-                                root.TryGetProperty("estadoAnterior", out JsonElement estadoAnteriorElement))
-                            {
-                                ToDoDTO tarea = JsonSerializer.Deserialize<ToDoDTO>(tareaElement.GetRawText());
-                                int estadoAnterior = estadoAnteriorElement.GetInt32();
+                    //        if (root.TryGetProperty("Titulo", out JsonElement tareaElement) &&
+                    //            root.TryGetProperty("Estado", out JsonElement estadoAnteriorElement))
+                    //        {
+                    //            ToDoDTO tarea = JsonSerializer.Deserialize<ToDoDTO>(tareaElement.GetRawText());
+                    //            int estadoAnterior = estadoAnteriorElement.GetInt32();
 
                               
-                                TareaCambiada?.Invoke(tarea, estadoAnterior);
+                    //            TareaCambiada?.Invoke(tarea, estadoAnterior);
 
                                 
-                                byte[] respuesta = Encoding.UTF8.GetBytes("{\"success\": true}");
-                                context.Response.StatusCode = 200;
-                                context.Response.ContentType = "application/json";
-                                context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
-                            }
-                            else
-                            {
+                    //            byte[] respuesta = Encoding.UTF8.GetBytes("{\"success\": true}");
+                    //            context.Response.StatusCode = 200;
+                    //            context.Response.ContentType = "application/json";
+                    //            context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
+                    //        }
+                    //        else
+                    //        {
                                 
-                                context.Response.StatusCode = 400;
-                                byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Formato de datos inválido\"}");
-                                context.Response.ContentType = "application/json";
-                                context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
-                            }
-                        }
-                        catch (Exception)
-                        {
+                    //            context.Response.StatusCode = 400;
+                    //            byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Formato de datos inválido\"}");
+                    //            context.Response.ContentType = "application/json";
+                    //            context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
+                    //        }
+                    //    }
+                    //    catch (Exception)
+                    //    {
                         
-                            context.Response.StatusCode = 400;
-                            byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Error al procesar los datos\"}");
-                            context.Response.ContentType = "application/json";
-                            context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
-                        }
-                        context.Response.Close();
-                    }
+                    //        context.Response.StatusCode = 400;
+                    //        byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Error al procesar los datos\"}");
+                    //        context.Response.ContentType = "application/json";
+                    //        context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
+                    //    }
+                    //    context.Response.Close();
+                    //}
                     else
                     {
                        

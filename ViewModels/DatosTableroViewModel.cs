@@ -59,57 +59,57 @@ namespace TableroKanbanHTTP.ViewModels
         {
             _server = server;
             _server.TareaRecibida += ManejarTareaRecibida;
-            _server.TareaCambiada += ManejarTareaCambiada;
+          
             CargarTareasGuardadas();
             _server.Iniciar();
         }
 
-        private void ManejarTareaCambiada(ToDoDTO tarea, int estadoAnterior)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                ToDoDTO tareaAEliminar = null;
-
-                switch (estadoAnterior)
-                {
-                    case 1: // ToDo
-                        tareaAEliminar = TareasToDo.FirstOrDefault(t =>
-                            t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
-                        if (tareaAEliminar != null)
-                            TareasToDo.Remove(tareaAEliminar);
-                        break;
-                    case 2: // Doing
-                        tareaAEliminar = TareasDoing.FirstOrDefault(t =>
-                            t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
-                        if (tareaAEliminar != null)
-                            TareasDoing.Remove(tareaAEliminar);
-                        break;
-                    case 3: // Done
-                        tareaAEliminar = TareasDone.FirstOrDefault(t =>
-                            t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
-                        if (tareaAEliminar != null)
-                            TareasDone.Remove(tareaAEliminar);
-                        break;
-                }
-
-                // Agregar la tarea a su nueva lista
-                ManejarTareaRecibida(tarea);
-            });
-        }
+     
 
         private void ManejarTareaRecibida(ToDoDTO tarea)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                ToDoDTO tareaAEliminar;   
                 switch (tarea.Estado)
                 {
-                    case 1: 
+                    case 1:
+                        tareaAEliminar = TareasDoing.FirstOrDefault(t =>
+                            t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
+                        if (tareaAEliminar != null&& tareaAEliminar.Estado == 2)
+                        {
+                            TareasDoing.Remove(tareaAEliminar);
+                        }
+                        else if(tareaAEliminar!= null && tareaAEliminar.Estado== 3)
+                        {
+                            TareasDone.Remove(tareaAEliminar);
+                        }
                         TareasToDo.Add(tarea);
                         break;
-                    case 2: 
+                    case 2:
+                        tareaAEliminar = TareasDoing.FirstOrDefault(t =>
+                          t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
+                        if (tareaAEliminar != null && tareaAEliminar.Estado == 1)
+                        {
+                            TareasToDo.Remove(tareaAEliminar);
+                        }
+                        else if (tareaAEliminar != null && tareaAEliminar.Estado == 3)
+                        {
+                            TareasDone.Remove(tareaAEliminar);
+                        }
                         TareasDoing.Add(tarea);
                         break;
-                    case 3: 
+                    case 3:
+                        tareaAEliminar = TareasDoing.FirstOrDefault(t =>
+                          t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
+                        if (tareaAEliminar != null && tareaAEliminar.Estado == 1)
+                        {
+                            TareasToDo.Remove(tareaAEliminar);
+                        }
+                        else if (tareaAEliminar != null && tareaAEliminar.Estado == 2)
+                        {
+                            TareasDoing.Remove(tareaAEliminar);
+                        }
                         TareasDone.Add(tarea);
                         break;
                 }
