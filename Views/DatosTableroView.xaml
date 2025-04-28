@@ -74,28 +74,28 @@
         </Border>
 
 
-        <WrapPanel Orientation="Vertical" Grid.Column="1" Margin="30" HorizontalAlignment="Center" VerticalAlignment="Top" Width="Auto">
+        <WrapPanel Orientation="Vertical" Grid.Column="1" Margin="0,30,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
             <Border Background="#E6E6FA" BorderBrush="#6A0DAD" BorderThickness="2" CornerRadius="10" Padding="15" Margin="0 0 0 20">
-                <StackPanel>
-                    <TextBlock FontWeight="Bold" Foreground="#6A0DAD" FontSize="10" Margin="0 0 0 10" >Usuarios conectados: <Span>0</Span></TextBlock>
+                <StackPanel Width="150px">
+                    <TextBlock FontWeight="Bold" Foreground="#6A0DAD" FontSize="14" Margin="0 0 0 10" >Usuarios conectados: <Span>0</Span></TextBlock>
                     <ListBox ItemsSource="{Binding UsuariosConectados}"
-                        Height="100" Width="100" Background="White" BorderBrush="#D48AA1" BorderThickness="2"/>
+                        Height="100" Width="150" Background="White" BorderBrush="#D48AA1" BorderThickness="2"/>
                 </StackPanel>
             </Border>
 
      
             <Border Background="#E6E6FA" BorderBrush="#6A0DAD" BorderThickness="2" CornerRadius="10" Padding="15">
-                <StackPanel>
-                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">
+                <StackPanel Height="150px" Width="150px">
+                    <TextBlock Foreground="#6A0DAD" FontSize="16" Margin="0 0 0 5">
                         Tareas totales: <Run Text="{Binding TareasTotales}"/>
                     </TextBlock>
-                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">
+                    <TextBlock Foreground="#6A0DAD" FontSize="16" Margin="0 0 0 5">
                         En To Do: <Run Text="{Binding TareasEnToDo}"/>
                     </TextBlock>
-                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">
+                    <TextBlock Foreground="#6A0DAD" FontSize="16" Margin="0 0 0 5">
                         En Doing: <Run Text="{Binding TareasEnDoing}"/>
                     </TextBlock>
-                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">
+                    <TextBlock Foreground="#6A0DAD" FontSize="16" Margin="0 0 0 5">
                         En Done: <Run Text="{Binding TareasEnDone}"/>
                     </TextBlock>
                 </StackPanel>

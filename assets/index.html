@@ -13,53 +13,31 @@
             scrollbar-width: none;
         }
 
-            *::-webkit-scrollbar {
-                display: none;
-            }
-        .name-input-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #unlock-button {
-            padding: 12px;
-            border-radius: 4px;
-            border: none;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
-            background: #555;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
+        *::-webkit-scrollbar {
             display: none;
         }
 
-        #name-input:disabled {
-            background: #eee;
-            color: #666;
-        }
         .board {
             width: 100%;
             height: 100vh;
             overflow: scroll;
-            background-image: url(https://images.unsplash.com/photo-1744058588832-5a0cf779b215?q=80&w=1428&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+            background-image: url(https://plus.unsplash.com/premium_photo-1674805594619-8ca8ad1ef3c5?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
             background-position: center;
             background-size: cover;
         }
 
         #todo-form {
             padding: 32px 32px 0;
+            display: flex;
+            gap: 12px;
         }
 
             #todo-form input {
                 padding: 12px;
-                margin-right: 12px;
                 width: 225px;
-                border-radius: 4px;
-                border: none;
-                box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
-                background: white;
+                border-radius: 8px;
+                border: 2px solid #6A0DAD;
+                background: #E6E6FA;
                 color: black;
                 font-weight: bold;
                 font-size: 14px;
@@ -68,10 +46,9 @@
 
             #todo-form button {
                 padding: 12px;
-                border-radius: 4px;
-                border: none;
-                box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
-                background: black;
+                border-radius: 8px;
+                border: 2px solid black;
+                background: #6A0DAD;
                 color: white;
                 font-weight: bold;
                 font-size: 14px;
@@ -82,15 +59,17 @@
             display: flex;
             align-items: flex-start;
             justify-content: start;
-            gap: 10px;
+            gap: 20px;
             padding: 24px 32px;
-            overflow: scroll;
+            overflow-x: auto;
             height: 100%;
         }
 
         .heading {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
+            color: #6A0DAD;
+            text-align: center;
             margin-bottom: 8px;
         }
 
@@ -98,30 +77,31 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            background: #f4f4f4;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
-            padding: 12px;
-            border-radius: 4px;
-            width: 225px;
-            min-height: 120px;
+            background: #E6E6FA;
+            border: 3px solid #6A0DAD;
+            padding: 16px;
+            border-radius: 15px;
+            width: 250px;
+            min-height: 150px;
             flex-shrink: 0;
         }
 
         .task {
             background: white;
             color: black;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+            border: 2px solid #D48AA1;
             padding: 12px;
-            border-radius: 4px;
+            border-radius: 8px;
             font-size: 16px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
             cursor: move;
         }
 
         .is-dragging {
-            scale: 1.05;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
-            background: rgb(50, 50, 50);
+            transform: scale(1.05);
+            background: #6A0DAD;
             color: white;
+            border: 2px solid #D48AA1;
         }
     </style>
 </head>
@@ -130,10 +110,10 @@
         <form id="todo-form">
             <div class="name-input-container">
                 <input type="text" required placeholder="Ingresa tu nombre" id="name-input" />
+                <input type="text" required placeholder="Nuevo TODO..." id="todo-input">
+                <button type="submit" id="send-button">Agregar</button>
                 <button type="button" id="unlock-button">Cambiar nombre</button>
             </div>
-            <input type="text" required placeholder="Nuevo TODO..." id="todo-input">
-            <button type="submit" id="send-button">Agregar</button>
         </form>
         <div class="lanes">
             <div class="swim-lane" id="todo-lane" data-valor="1">
@@ -234,11 +214,14 @@
         const input = document.getElementById("todo-input");
         const inputname = document.getElementById("name-input");
         const todoLane = document.getElementById("todo-lane");
+
         unlockButton.addEventListener("click", () => {
             nameInput.disabled = false;
             unlockButton.style.display = 'none';
             nameLocked = false;
             nameInput.focus();
+
+            document.querySelectorAll(".task").forEach(task => task.remove());
         });
 
         form.addEventListener("submit", async (e) => {
@@ -296,6 +279,9 @@
         document.querySelectorAll(".task").forEach(task => {
             setupDraggable(task);
         });
+
+  
+
     </script>
 </body>
 </html>
