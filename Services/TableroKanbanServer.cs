@@ -25,7 +25,7 @@ namespace TableroKanbanHTTP.Services
 
         public void Iniciar()
         {
-            server.Prefixes.Add("http://*:35000/tablero/");
+            server.Prefixes.Add("http://*:20000/tablero/");
             server.Start();
 
             Thread hilo = new Thread(Escuchar)
