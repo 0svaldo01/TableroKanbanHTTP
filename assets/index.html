@@ -2,19 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="estilos.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tablero Kanban</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+            *::-webkit-scrollbar {
+                display: none;
+            }
+
+        .board {
+            width: 100%;
+            height: 100vh;
+            overflow: scroll;
+            background-image: url(https://images.unsplash.com/photo-1744058588832-5a0cf779b215?q=80&w=1428&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+            background-position: center;
+            background-size: cover;
+        }
+
+        #todo-form {
+            padding: 32px 32px 0;
+        }
+
+            #todo-form input {
+                padding: 12px;
+                margin-right: 12px;
+                width: 225px;
+                border-radius: 4px;
+                border: none;
+                box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+                background: white;
+                color: black;
+                font-weight: bold;
+                font-size: 14px;
+                outline: none;
+            }
+
+            #todo-form button {
+                padding: 12px;
+                border-radius: 4px;
+                border: none;
+                box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+                background: black;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+        .lanes {
+            display: flex;
+            align-items: flex-start;
+            justify-content: start;
+            gap: 10px;
+            padding: 24px 32px;
+            overflow: scroll;
+            height: 100%;
+        }
+
+        .heading {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .swim-lane {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f4f4f4;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+            padding: 12px;
+            border-radius: 4px;
+            width: 225px;
+            min-height: 120px;
+            flex-shrink: 0;
+        }
+
+        .task {
+            background: white;
+            color: black;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: move;
+        }
+
+        .is-dragging {
+            scale: 1.05;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+            background: rgb(50, 50, 50);
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    
-    <script src="drag.js" defer></script>
-    <script src="todo.js" defer></script>
-
-
     <div class="board">
         <form id="todo-form">
-            <input type="text" placeholder="Ingresa tu nombre" id="name-input" />       
+            <input type="text" placeholder="Ingresa tu nombre" id="name-input" />
             <input type="text" placeholder="Nuevo TODO..." id="todo-input">
             <button type="submit" id="send-button">Agregar</button>
         </form>
@@ -30,21 +122,122 @@
             </div>
         </div>
     </div>
-   
-    <script>
 
-        let name = document.getElementById("name-input");
-        let todoInput = document.getElementById("todo-input");
-        let todoLane = document.getElementById("todo-lane");
-        let enviar = document.getElementById("send-button").addEventListener("click", async function (e) {
-            e.preventDefault();
-            if (document.forms[0].checkValidity()) {
+    <script>
+        // Código para drag and drop (drag.js)
+        const droppables = document.querySelectorAll(".swim-lane");
+
+        // Función para configurar un elemento arrastrable
+        function setupDraggable(task) {
+            task.addEventListener("dragstart", () => {
+                task.classList.add("is-dragging");
+            });
+
+            task.addEventListener("dragend", async () => {
+                task.classList.remove("is-dragging");
+
+                // Obtener la nueva zona (contenedor padre)
+                const newZone = task.parentElement;
+
+                // Extraer el nombre y título del texto de la tarea
+                const taskText = task.innerText;
+                const parts = taskText.split(" - ");
+                const nombre = parts[0];
+                const titulo = parts.slice(1).join(" - ");
+
+                // Crear el objeto para enviar al servidor
                 let todo = {
-                    Nombre: name.value,
-                    Titulo: todoInput.value,
+                    Nombre: nombre,
+                    Titulo: titulo,
+                    Estado: parseInt(newZone.getAttribute("data-valor"))
+                };
+
+                // Enviar la actualización al servidor
+                try {
+                    console.log("Enviando actualización:", todo);
+                    let response = await fetch("/tablero/tarea", {
+                        method: "POST", // Usar PUT para actualizar
+                        body: JSON.stringify(todo),
+                        headers: {
+                            "content-type": "application/json"
+                        }
+                    });
+                    console.log("Respuesta del servidor:", response);
+                } catch (ex) {
+                    console.log("Error al actualizar:", ex);
+                }
+            });
+        }
+
+        // Configurar las zonas donde se pueden soltar elementos
+        droppables.forEach((zone) => {
+            zone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                const bottomTask = insertAboveTask(zone, e.clientY);
+                const curTask = document.querySelector(".is-dragging");
+
+                if (!bottomTask) {
+                    zone.appendChild(curTask);
+                } else {
+                    zone.insertBefore(curTask, bottomTask);
+                }
+            });
+        });
+
+        const insertAboveTask = (zone, mouseY) => {
+            const els = zone.querySelectorAll(".task:not(.is-dragging)");
+            let closestTask = null;
+            let closestOffset = Number.NEGATIVE_INFINITY;
+
+            els.forEach((task) => {
+                const { top } = task.getBoundingClientRect();
+                const offset = mouseY - top;
+
+                if (offset < 0 && offset > closestOffset) {
+                    closestOffset = offset;
+                    closestTask = task;
+                }
+            });
+
+            return closestTask;
+        };
+
+        // Código combinado para manejar el formulario
+        const form = document.getElementById("todo-form");
+        const input = document.getElementById("todo-input");
+        const inputname = document.getElementById("name-input");
+        const todoLane = document.getElementById("todo-lane");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const nombre = inputname.value;
+            const value = input.value;
+
+            if (!value || !nombre) return;
+
+            if (document.forms[0].checkValidity()) {
+                // 1. Crear el elemento visualmente
+                const newTask = document.createElement("p");
+                newTask.classList.add("task");
+                newTask.setAttribute("draggable", "true");
+                newTask.innerText = nombre + " - " + value;
+
+                // Configurar el nuevo elemento para drag and drop
+                setupDraggable(newTask);
+
+                // Añadir a la lista TO DO
+                todoLane.appendChild(newTask);
+
+                // 2. Enviar al servidor
+                let todo = {
+                    Nombre: nombre,
+                    Titulo: value,
                     Estado: parseInt(todoLane.getAttribute("data-valor"))
                 };
+
                 try {
+                    console.log("Enviando nueva tarea:", todo);
                     let response = await fetch("/tablero/tarea", {
                         method: "POST",
                         body: JSON.stringify(todo),
@@ -52,16 +245,23 @@
                             "content-type": "application/json"
                         }
                     });
+                    console.log("Respuesta del servidor:", response);
+                } catch (ex) {
+                    console.log("Error al crear tarea:", ex);
                 }
-                catch (ex) {
-                    console.log(ex);
-                }
+
+                // Limpiar los campos
+                input.value = "";
+                inputname.value = "";
             } else {
                 document.forms[0].reportValidity();
             }
         });
 
+        // Configurar arrastrar y soltar para las tareas existentes
+        document.querySelectorAll(".task").forEach(task => {
+            setupDraggable(task);
+        });
     </script>
-
 </body>
 </html>

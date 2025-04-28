@@ -62,6 +62,7 @@ namespace TableroKanbanHTTP.Services
                     {
                         ServirArchivoEstatico(context, "index.html", "text/html");
                     }
+ 
                     else if (path == "tareas")
                     {
                         context.Response.StatusCode = 200;
