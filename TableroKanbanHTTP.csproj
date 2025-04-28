@@ -9,25 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="assets\drag.js" />
-    <None Remove="assets\estilos.css" />
-    <None Remove="assets\index.html" />
-    <None Remove="assets\todo.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="assets\drag.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="assets\estilos.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="assets\index.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="assets\todo.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <None Update="assets\drag.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\estilos.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\todo.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
