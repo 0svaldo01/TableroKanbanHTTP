@@ -42,7 +42,7 @@ namespace TableroKanbanHTTP.Services
                 new Thread(Escuchar) { IsBackground = true }.Start();
                 if (contexto != null)
                 {
-
+                    ProcesarSolicitud(contexto);
                 }
             }
             catch (Exception ex)
@@ -80,7 +80,7 @@ namespace TableroKanbanHTTP.Services
                 {
                     if (path == "tarea")
                     {
-                        // Procesar la creación de una nueva tarea
+                       
                         using StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
                         string json = reader.ReadToEnd();
 
@@ -90,10 +90,10 @@ namespace TableroKanbanHTTP.Services
 
                             if (tarea != null)
                             {
-                                // Notificar al ViewModel que se ha recibido una tarea
+                              
                                 TareaRecibida?.Invoke(tarea);
 
-                                // Responder con éxito
+                              
                                 byte[] respuesta = Encoding.UTF8.GetBytes("{\"success\": true}");
                                 context.Response.StatusCode = 200;
                                 context.Response.ContentType = "application/json";
@@ -101,7 +101,7 @@ namespace TableroKanbanHTTP.Services
                             }
                             else
                             {
-                                // Error en el formato de la tarea
+                             
                                 context.Response.StatusCode = 400;
                                 byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Formato de tarea inválido\"}");
                                 context.Response.ContentType = "application/json";
@@ -110,7 +110,7 @@ namespace TableroKanbanHTTP.Services
                         }
                         catch (JsonException)
                         {
-                            // Error al deserializar el JSON
+                           
                             context.Response.StatusCode = 400;
                             byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"JSON inválido\"}");
                             context.Response.ContentType = "application/json";
@@ -121,7 +121,7 @@ namespace TableroKanbanHTTP.Services
                     }
                     else if (path == "cambio-estado")
                     {
-                        // Procesar el cambio de estado de una tarea
+                       
                         using StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
                         string json = reader.ReadToEnd();
 
@@ -136,10 +136,10 @@ namespace TableroKanbanHTTP.Services
                                 ToDoDTO tarea = JsonSerializer.Deserialize<ToDoDTO>(tareaElement.GetRawText());
                                 int estadoAnterior = estadoAnteriorElement.GetInt32();
 
-                                // Notificar al ViewModel que se ha cambiado el estado de una tarea
+                              
                                 TareaCambiada?.Invoke(tarea, estadoAnterior);
 
-                                // Responder con éxito
+                                
                                 byte[] respuesta = Encoding.UTF8.GetBytes("{\"success\": true}");
                                 context.Response.StatusCode = 200;
                                 context.Response.ContentType = "application/json";
@@ -147,7 +147,7 @@ namespace TableroKanbanHTTP.Services
                             }
                             else
                             {
-                                // Error en el formato de los datos
+                                
                                 context.Response.StatusCode = 400;
                                 byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Formato de datos inválido\"}");
                                 context.Response.ContentType = "application/json";
@@ -156,7 +156,7 @@ namespace TableroKanbanHTTP.Services
                         }
                         catch (Exception)
                         {
-                            // Error al procesar los datos
+                        
                             context.Response.StatusCode = 400;
                             byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Error al procesar los datos\"}");
                             context.Response.ContentType = "application/json";
@@ -166,7 +166,7 @@ namespace TableroKanbanHTTP.Services
                     }
                     else
                     {
-                        // Recurso no encontrado
+                       
                         context.Response.StatusCode = 404;
                         context.Response.Close();
                     }
