@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TableroKanbanHTTP.Services;
+using TableroKanbanHTTP.ViewModels;
 
 namespace TableroKanbanHTTP
 {
@@ -16,9 +18,15 @@ namespace TableroKanbanHTTP
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly TableroKanbanServer server;
+        private readonly DatosTableroViewModel viewModel;
         public MainWindow()
         {
             InitializeComponent();
+            server = new TableroKanbanServer();
+            viewModel =new DatosTableroViewModel(server);
+            DataContext = viewModel;
+
         }
     }
 }

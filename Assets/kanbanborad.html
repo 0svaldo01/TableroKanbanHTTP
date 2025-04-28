@@ -22,11 +22,11 @@
             <div class="swim-lane" id="todo-lane" data-valor="1">
                 <h2 class="heading">TO DO</h2>
             </div>
-            <div class="swim-lane" data-valor="2">
+            <div class="swim-lane" id="doing-lane" data-valor="2">
                 <h2 class="heading">DOING</h2>
             </div>
-            <div class="swim-lane" data-valor="3">
-                <h2 class="heading">DONE</h2>            
+            <div class="swim-lane" id="done-lane" data-valor="3">
+                <h2 class="heading">DONE</h2>
             </div>
         </div>
     </div>
@@ -34,16 +34,17 @@
     <script>
 
         let name = document.getElementById("name-input");
-        let todo = document.getElementById("todo-input");
-        let todolist = document.getElementById("todo-lane");
-
-        let enviar = document.getElementById("send-button").addEventListener("click", async function (e)
-        {
+        let todoInput = document.getElementById("todo-input");
+        let todoLane = document.getElementById("todo-lane");
+        let enviar = document.getElementById("send-button").addEventListener("click", async function (e) {
+            e.preventDefault();
             if (document.forms[0].checkValidity()) {
-                let todo = { Nombre: name.value, Tarea: todo.value, valor: todolist.data-valor };
-
+                let todo = {
+                    Nombre: name.value,
+                    Titulo: todoInput.value,
+                    Estado: parseInt(todoLane.getAttribute("data-valor"))
+                };
                 try {
-
                     let response = await fetch("/tablero/tarea", {
                         method: "POST",
                         body: JSON.stringify(todo),
@@ -51,20 +52,14 @@
                             "content-type": "application/json"
                         }
                     });
-
                 }
                 catch (ex) {
                     console.log(ex);
                 }
-
-
             } else {
                 document.forms[0].reportValidity();
             }
-
         });
-
-
 
     </script>
 

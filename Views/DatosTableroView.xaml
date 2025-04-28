@@ -28,13 +28,48 @@
                 <TextBlock Text="DOING"  FontWeight="Bold" HorizontalAlignment="Center" Margin="10" FontSize="24" Grid.Column="1"/>
                 <TextBlock Text="DONE"  FontWeight="Bold" HorizontalAlignment="Center" Margin="10" FontSize="24" Grid.Column="2"/>
 
-       
-                <ListBox BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" 
-                         Padding="5" BorderThickness="2" />
-                <ListBox BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" Grid.Column="1" 
-                         Padding="5" BorderThickness="2" />
-                <ListBox BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" Grid.Column="2" 
-                         Padding="5" BorderThickness="2" />
+
+                <ListBox ItemsSource="{Binding TareasToDo}" 
+                    BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" 
+                         Padding="5" BorderThickness="2">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding Nombre}" FontWeight="Bold"/>
+                                <Run Text=" - "/>
+                                <Run Text="{Binding Titulo}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+
+                <ListBox ItemsSource="{Binding TareasDoing }" 
+                    BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" Grid.Column="1" 
+                         Padding="5" BorderThickness="2">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding Nombre}" FontWeight="Bold"/>
+                                <Run Text=" - "/>
+                                <Run Text="{Binding Titulo}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <ListBox ItemsSource="{Binding TareasDone}"
+                    BorderBrush="#D48AA1" Background="White" FontSize="16" Margin="10" Grid.Row="1" Grid.Column="2" 
+                         Padding="5" BorderThickness="2">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding Nombre}" FontWeight="Bold"/>
+                                <Run Text=" - "/>
+                                <Run Text="{Binding Titulo}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
         </Border>
 
@@ -43,17 +78,26 @@
             <Border Background="#E6E6FA" BorderBrush="#6A0DAD" BorderThickness="2" CornerRadius="10" Padding="15" Margin="0 0 0 20">
                 <StackPanel>
                     <TextBlock FontWeight="Bold" Foreground="#6A0DAD" FontSize="10" Margin="0 0 0 10" >Usuarios conectados: <Span>0</Span></TextBlock>
-                    <ListBox Height="100" Width="100" Background="White" BorderBrush="#D48AA1" BorderThickness="2"/>
+                    <ListBox ItemsSource="{Binding UsuariosConectados}"
+                        Height="100" Width="100" Background="White" BorderBrush="#D48AA1" BorderThickness="2"/>
                 </StackPanel>
             </Border>
 
      
             <Border Background="#E6E6FA" BorderBrush="#6A0DAD" BorderThickness="2" CornerRadius="10" Padding="15">
                 <StackPanel>
-                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">Tareas totales:<Span>0</Span></TextBlock>
-                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">En progreso:<Span>0</Span></TextBlock>
-                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">En progreso: <Span>0</Span></TextBlock>
-                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">En progreso: <Span>0</Span></TextBlock>
+                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">
+                        Tareas totales: <Run Text="{Binding TareasTotales}"/>
+                    </TextBlock>
+                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">
+                        En To Do: <Run Text="{Binding TareasEnToDo}"/>
+                    </TextBlock>
+                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">
+                        En Doing: <Run Text="{Binding TareasEnDoing}"/>
+                    </TextBlock>
+                    <TextBlock Foreground="Black" FontSize="10" Margin="0 0 0 5">
+                        En Done: <Run Text="{Binding TareasEnDone}"/>
+                    </TextBlock>
                 </StackPanel>
             </Border>
         </WrapPanel>
