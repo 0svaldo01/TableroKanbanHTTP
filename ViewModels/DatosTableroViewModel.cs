@@ -28,28 +28,28 @@ namespace TableroKanbanHTTP.ViewModels
         public int TareasTotales
         {
             get { return _tareasTotales; }
-            set { _tareasTotales = value; }
+            set => SetProperty(ref _tareasTotales, value);
         }
         private int _tareasEnToDo;
 
         public int TareasEnToDo
         {
             get { return _tareasEnToDo; }
-            set { _tareasEnToDo = value; }
+            set => SetProperty(ref _tareasEnToDo, value);
         }
         private int _tareasEnDoing;
 
         public int TareasEnDoing
         {
             get { return _tareasEnDoing; }
-            set { _tareasEnDoing = value; }
+            set => SetProperty(ref _tareasEnDoing, value);
         }
         private int _tareasEnDone;
 
         public int TareasEnDone
         {
             get { return _tareasEnDone; }
-            set { _tareasEnDone = value; }
+            set => SetProperty(ref _tareasEnDone, value);
         }
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -70,46 +70,45 @@ namespace TableroKanbanHTTP.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                ToDoDTO tareaAEliminar;   
+                ToDoDTO tareaAEliminar = TareasToDo.FirstOrDefault(t =>
+                        t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
+
+                if (tareaAEliminar == null)
+                {
+                    tareaAEliminar = TareasDoing.FirstOrDefault(t =>
+                        t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
+                }
+
+                if (tareaAEliminar == null)
+                {
+                    tareaAEliminar = TareasDone.FirstOrDefault(t =>
+                        t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
+                }
+                if (tareaAEliminar != null)
+                {
+                    if (TareasToDo.Contains(tareaAEliminar))
+                    {
+                        TareasToDo.Remove(tareaAEliminar);
+                    }
+                    else if (TareasDoing.Contains(tareaAEliminar))
+                    {
+                        TareasDoing.Remove(tareaAEliminar);
+                    }
+                    else if (TareasDone.Contains(tareaAEliminar))
+                    {
+                        TareasDone.Remove(tareaAEliminar);
+                    }
+                }
                 switch (tarea.Estado)
                 {
                     case 1:
-                        tareaAEliminar = TareasDoing.FirstOrDefault(t =>
-                            t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
-                        if (tareaAEliminar != null&& tareaAEliminar.Estado == 2)
-                        {
-                            TareasDoing.Remove(tareaAEliminar);
-                        }
-                        else if(tareaAEliminar!= null && tareaAEliminar.Estado== 3)
-                        {
-                            TareasDone.Remove(tareaAEliminar);
-                        }
+           
                         TareasToDo.Add(tarea);
                         break;
                     case 2:
-                        tareaAEliminar = TareasDoing.FirstOrDefault(t =>
-                          t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
-                        if (tareaAEliminar != null && tareaAEliminar.Estado == 1)
-                        {
-                            TareasToDo.Remove(tareaAEliminar);
-                        }
-                        else if (tareaAEliminar != null && tareaAEliminar.Estado == 3)
-                        {
-                            TareasDone.Remove(tareaAEliminar);
-                        }
                         TareasDoing.Add(tarea);
                         break;
                     case 3:
-                        tareaAEliminar = TareasDoing.FirstOrDefault(t =>
-                          t.Nombre == tarea.Nombre && t.Titulo == tarea.Titulo);
-                        if (tareaAEliminar != null && tareaAEliminar.Estado == 1)
-                        {
-                            TareasToDo.Remove(tareaAEliminar);
-                        }
-                        else if (tareaAEliminar != null && tareaAEliminar.Estado == 2)
-                        {
-                            TareasDoing.Remove(tareaAEliminar);
-                        }
                         TareasDone.Add(tarea);
                         break;
                 }

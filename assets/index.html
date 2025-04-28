@@ -16,7 +16,29 @@
             *::-webkit-scrollbar {
                 display: none;
             }
+        .name-input-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
+        #unlock-button {
+            padding: 12px;
+            border-radius: 4px;
+            border: none;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+            background: #555;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+        }
+
+        #name-input:disabled {
+            background: #eee;
+            color: #666;
+        }
         .board {
             width: 100%;
             height: 100vh;
@@ -106,8 +128,11 @@
 <body>
     <div class="board">
         <form id="todo-form">
-            <input type="text" placeholder="Ingresa tu nombre" id="name-input" />
-            <input type="text" placeholder="Nuevo TODO..." id="todo-input">
+            <div class="name-input-container">
+                <input type="text" required placeholder="Ingresa tu nombre" id="name-input" />
+                <button type="button" id="unlock-button">Cambiar nombre</button>
+            </div>
+            <input type="text" required placeholder="Nuevo TODO..." id="todo-input">
             <button type="submit" id="send-button">Agregar</button>
         </form>
         <div class="lanes">
@@ -124,10 +149,12 @@
     </div>
 
     <script>
-        // Código para drag and drop (drag.js)
+
         const droppables = document.querySelectorAll(".swim-lane");
 
-        // Función para configurar un elemento arrastrable
+        const nameInput = document.getElementById("name-input");
+        const unlockButton = document.getElementById("unlock-button");
+        let nameLocked = false;
         function setupDraggable(task) {
             task.addEventListener("dragstart", () => {
                 task.classList.add("is-dragging");
@@ -136,27 +163,27 @@
             task.addEventListener("dragend", async () => {
                 task.classList.remove("is-dragging");
 
-                // Obtener la nueva zona (contenedor padre)
+       
                 const newZone = task.parentElement;
 
-                // Extraer el nombre y título del texto de la tarea
+         
                 const taskText = task.innerText;
                 const parts = taskText.split(" - ");
                 const nombre = parts[0];
                 const titulo = parts.slice(1).join(" - ");
 
-                // Crear el objeto para enviar al servidor
+               
                 let todo = {
                     Nombre: nombre,
                     Titulo: titulo,
                     Estado: parseInt(newZone.getAttribute("data-valor"))
                 };
 
-                // Enviar la actualización al servidor
+
                 try {
                     console.log("Enviando actualización:", todo);
                     let response = await fetch("/tablero/tarea", {
-                        method: "POST", // Usar PUT para actualizar
+                        method: "POST",
                         body: JSON.stringify(todo),
                         headers: {
                             "content-type": "application/json"
@@ -169,7 +196,7 @@
             });
         }
 
-        // Configurar las zonas donde se pueden soltar elementos
+       
         droppables.forEach((zone) => {
             zone.addEventListener("dragover", (e) => {
                 e.preventDefault();
@@ -202,13 +229,20 @@
             return closestTask;
         };
 
-        // Código combinado para manejar el formulario
+
         const form = document.getElementById("todo-form");
         const input = document.getElementById("todo-input");
         const inputname = document.getElementById("name-input");
         const todoLane = document.getElementById("todo-lane");
+        unlockButton.addEventListener("click", () => {
+            nameInput.disabled = false;
+            unlockButton.style.display = 'none';
+            nameLocked = false;
+            nameInput.focus();
+        });
 
         form.addEventListener("submit", async (e) => {
+        
             e.preventDefault();
 
             const nombre = inputname.value;
@@ -217,19 +251,22 @@
             if (!value || !nombre) return;
 
             if (document.forms[0].checkValidity()) {
-                // 1. Crear el elemento visualmente
+                
+                if (!nameLocked) {
+                    nameInput.disabled = true;
+                    unlockButton.style.display = 'block';
+                    nameLocked = true;
+                }
+            
+
                 const newTask = document.createElement("p");
                 newTask.classList.add("task");
                 newTask.setAttribute("draggable", "true");
                 newTask.innerText = nombre + " - " + value;
 
-                // Configurar el nuevo elemento para drag and drop
                 setupDraggable(newTask);
-
-                // Añadir a la lista TO DO
                 todoLane.appendChild(newTask);
 
-                // 2. Enviar al servidor
                 let todo = {
                     Nombre: nombre,
                     Titulo: value,
@@ -250,15 +287,12 @@
                     console.log("Error al crear tarea:", ex);
                 }
 
-                // Limpiar los campos
                 input.value = "";
-                inputname.value = "";
             } else {
                 document.forms[0].reportValidity();
             }
         });
 
-        // Configurar arrastrar y soltar para las tareas existentes
         document.querySelectorAll(".task").forEach(task => {
             setupDraggable(task);
         });
