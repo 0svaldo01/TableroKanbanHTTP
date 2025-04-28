@@ -60,7 +60,7 @@ namespace TableroKanbanHTTP.ViewModels
             _server = server;
             _server.TareaRecibida += ManejarTareaRecibida;
             _server.TareaCambiada += ManejarTareaCambiada;
-            
+            CargarTareasGuardadas();
             _server.Iniciar();
         }
 

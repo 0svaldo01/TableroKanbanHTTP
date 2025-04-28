@@ -78,7 +78,7 @@ namespace TableroKanbanHTTP.Services
                 }
                 else if (context.Request.HttpMethod == "POST")
                 {
-                    if (path == "tarea")
+                    if (path == "/tablero/tarea")
                     {
                        
                         using StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
@@ -119,7 +119,7 @@ namespace TableroKanbanHTTP.Services
 
                         context.Response.Close();
                     }
-                    else if (path == "cambio-estado")
+                    else if (path == "/tablero/cambio-estado")
                     {
                        
                         using StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
