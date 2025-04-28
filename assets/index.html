@@ -220,9 +220,12 @@
             unlockButton.style.display = 'none';
             nameLocked = false;
             nameInput.focus();
+          
 
             document.querySelectorAll(".task").forEach(task => task.remove());
         });
+
+
 
         form.addEventListener("submit", async (e) => {
         
