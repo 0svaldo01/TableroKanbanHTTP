@@ -6,7 +6,11 @@
         xmlns:views="clr-namespace:TableroKanbanHTTP.Views"
         xmlns:local="clr-namespace:TableroKanbanHTTP"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        xmlns:viewmodel="clr-namespace:TableroKanbanHTTP.ViewModels">
+    <Window.DataContext>
+        <viewmodel:DatosTableroViewModel></viewmodel:DatosTableroViewModel>
+    </Window.DataContext>
     <Grid>
        
     </Grid>
