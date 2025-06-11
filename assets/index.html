@@ -152,7 +152,7 @@
         let editandoId = null;
         let nombreActual = "";
 
-        // Cargar datos del servidor
+       
         async function cargarTablero() {
             try {
                 const response = await fetch('/kanban/tablero');
@@ -173,7 +173,7 @@
                     const card = document.createElement('div');
                     card.className = 'task';
 
-                    // Solo permitir drag si es el autor y no está terminado
+                   
                     card.draggable = tarea.Nombre === nombreActual && col !== 'Terminado';
                     card.ondragstart = e => e.dataTransfer.setData('id', tarea.Id);
 
@@ -210,7 +210,7 @@
             const descripcion = document.getElementById('descripcion').value.trim();
             const errorDiv = document.getElementById('error-msg');
 
-            // Validaciones
+         
             if (!titulo || titulo.length > 50) {
                 errorDiv.innerText = "El título es requerido y no puede exceder 50 caracteres";
                 return;
@@ -222,7 +222,7 @@
 
             try {
                 if (editandoId) {
-                    // Editar tarea existente
+                    
                     const response = await fetch('/kanban/editar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -243,7 +243,7 @@
                         return;
                     }
                 } else {
-                    // Crear nueva tarea
+                    
                     const response = await fetch('/kanban/agregar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -366,9 +366,9 @@
             }
         }
 
-        // Cargar datos al iniciar y cada 3 segundos
+      
         cargarTablero();
-        setInterval(cargarTablero, 3000);
+        setInterval(cargarTablero, 500);
     </script>
 </body>
 </html>
