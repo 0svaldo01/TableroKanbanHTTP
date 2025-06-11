@@ -10,17 +10,55 @@ using System.Threading.Tasks;
 using TableroKanbanHTTP.Models;
 using System.Threading.Tasks;
 using Microsoft.Win32;
+using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace TableroKanbanHTTP.Services
 {
     public class TableroKanbanServer
     {
         HttpListener server = new();
+        public event Action? TableroActualizado;
 
-        public event Action<ToDoDTO>? TareaRecibida;
+        private readonly string archivoTareas = "tareas.json";
+        private readonly ToDoList _tablero = new();
         byte[]? index;
 
-        private readonly string assetsPath = "assets";
+        public TableroKanbanServer()
+        {
+            _tablero = CargarTablero();
+        }
+
+        private void GuardarTablero()
+        {
+            var opciones = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Converters = { new JsonStringEnumConverter() }
+            };
+            File.WriteAllText(archivoTareas, JsonSerializer.Serialize(_tablero, opciones));
+        }
+
+        private ToDoList CargarTablero()
+        {
+            try
+            {
+                if (File.Exists(archivoTareas))
+                {
+                    var opciones = new JsonSerializerOptions
+                    {
+                        Converters = { new JsonStringEnumConverter() }
+                    };
+                    string json = File.ReadAllText(archivoTareas);
+                    return JsonSerializer.Deserialize<ToDoList>(json, opciones) ?? new ToDoList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al cargar tablero: " + ex.Message);
+            }
+            return new ToDoList();
+        }
 
         public void Iniciar()
         {
@@ -33,188 +71,220 @@ namespace TableroKanbanHTTP.Services
             };
             hilo.Start();
         }
+
         void Escuchar()
         {
-            try
-            {
-                var contexto = server.GetContext();
-                new Thread(Escuchar) { IsBackground = true }.Start();
-                if (contexto != null)
-                {
-                    ProcesarSolicitud(contexto);
-                }
-            }
-            catch (Exception ex)
-            {
+            var contexto = server.GetContext();
+            new Thread(Escuchar) { IsBackground = true }.Start();
 
-                Console.WriteLine($"Error en el servidor: {ex.Message}");
-            }
-        }
-        private void ProcesarSolicitud(HttpListenerContext context)
-        {
-            try
+            if (contexto != null)
             {
-                string path = context.Request.Url.AbsolutePath;
-                if (context.Request.HttpMethod == "GET")
+                
+                if (contexto.Request.HttpMethod == "GET" &&
+                   (contexto.Request.RawUrl == "/kanban/" || contexto.Request.RawUrl == "/kanban/index"))
                 {
-                    if (path == "/" || path == "/tablero/" || path == "/tablero/index" || path == "/tablero/index.html")
+                    if (index == null)
                     {
-                        ServirArchivoEstatico(context, "index.html", "text/html");
+                        index = File.ReadAllBytes("assets/index.html");
                     }
- 
-                    else if (path == "tareas")
-                    {
-                        context.Response.StatusCode = 200;
-                        context.Response.ContentType = "application/json";
-                        byte[] buffer = Encoding.UTF8.GetBytes("[]");
-                        context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                        context.Response.Close();
-                    }
-                    else
-                    {
-                        context.Response.StatusCode = 404;
-                        context.Response.Close();
-                    }
-                }
-                else if (context.Request.HttpMethod == "POST")
-                {
-                    if (path == "/tablero/tarea")
-                    {
-                       
-                        using StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
-                        string json = reader.ReadToEnd();
 
-                        try
+                    contexto.Response.ContentLength64 = index.Length;
+                    contexto.Response.ContentType = "text/html";
+                    contexto.Response.OutputStream.Write(index, 0, index.Length);
+                    contexto.Response.StatusCode = 200;
+                    contexto.Response.Close();
+                }
+          
+                else if (contexto.Request.HttpMethod == "GET" && contexto.Request.RawUrl == "/kanban/tablero")
+                {
+                    var opciones = new JsonSerializerOptions
+                    {
+                        Converters = { new JsonStringEnumConverter() }
+                    };
+
+                    string json = JsonSerializer.Serialize(_tablero, opciones);
+                    byte[] buffer = Encoding.UTF8.GetBytes(json);
+
+                    contexto.Response.ContentType = "application/json";
+                    contexto.Response.ContentLength64 = buffer.Length;
+                    contexto.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    contexto.Response.StatusCode = 200;
+                    contexto.Response.Close();
+                }
+               
+                else if (contexto.Request.HttpMethod == "POST" && contexto.Request.RawUrl == "/kanban/agregar")
+                {
+                    byte[] bufferEntrada = new byte[contexto.Request.ContentLength64];
+                    contexto.Request.InputStream.Read(bufferEntrada, 0, bufferEntrada.Length);
+                    string json = Encoding.UTF8.GetString(bufferEntrada);
+
+                    var tarea = JsonSerializer.Deserialize<ToDoDTO>(json);
+                    if (tarea != null)
+                    {
+                        
+                        if (string.IsNullOrWhiteSpace(tarea.Titulo) || tarea.Titulo.Length > 50)
                         {
-                            ToDoDTO tarea = JsonSerializer.Deserialize<ToDoDTO>(json);
+                            contexto.Response.StatusCode = 400;
+                            contexto.Response.Close();
+                            return;
+                        }
 
-                            if (tarea != null)
+                        if (string.IsNullOrWhiteSpace(tarea.Descripcion) || tarea.Descripcion.Length > 100)
+                        {
+                            contexto.Response.StatusCode = 400;
+                            contexto.Response.Close();
+                            return;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(tarea.Nombre))
+                        {
+                            contexto.Response.StatusCode = 400;
+                            contexto.Response.Close();
+                            return;
+                        }
+
+                        tarea.Estado = Estados.Pendiente;
+                        tarea.Id = _tablero.Tareas.Count > 0 ? _tablero.Tareas.Max(t => t.Id) + 1 : 1;
+                        tarea.FechaCreacion = DateTime.Now;
+
+                        _tablero.Tareas.Add(tarea);
+                        GuardarTablero();
+                        TableroActualizado?.Invoke();
+                    }
+                    contexto.Response.StatusCode = 200;
+                    contexto.Response.Close();
+                }
+            
+                else if (contexto.Request.HttpMethod == "POST" && contexto.Request.RawUrl == "/kanban/mover")
+                {
+                    byte[] bufferEntrada = new byte[contexto.Request.ContentLength64];
+                    contexto.Request.InputStream.Read(bufferEntrada, 0, bufferEntrada.Length);
+                    string json = Encoding.UTF8.GetString(bufferEntrada);
+
+                    var data = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+                    if (data != null && data.ContainsKey("id") && data.ContainsKey("estado") && data.ContainsKey("usuario"))
+                    {
+                        int id = int.Parse(data["id"]);
+                        Estados nuevoEstado = Enum.Parse<Estados>(data["estado"]);
+                        string usuario = data["usuario"];
+
+                        var tarea = _tablero.Tareas.FirstOrDefault(t => t.Id == id);
+                        if (tarea != null)
+                        {
+                            
+                            if (tarea.Nombre != usuario)
                             {
-                              
-                                TareaRecibida?.Invoke(tarea);
+                                contexto.Response.StatusCode = 403; 
+                                contexto.Response.Close();
+                                return;
+                            }
 
-                              
-                                byte[] respuesta = Encoding.UTF8.GetBytes("{\"success\": true}");
-                                context.Response.StatusCode = 200;
-                                context.Response.ContentType = "application/json";
-                                context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
+                       
+                            var estadosOrden = new[] { Estados.Pendiente, Estados.EnProceso, Estados.Terminado };
+                            int estadoActualIndex = Array.IndexOf(estadosOrden, tarea.Estado);
+                            int nuevoEstadoIndex = Array.IndexOf(estadosOrden, nuevoEstado);
+
+                           
+                            if (nuevoEstadoIndex == estadoActualIndex + 1 || nuevoEstadoIndex == estadoActualIndex)
+                            {
+                                tarea.Estado = nuevoEstado;
+                                GuardarTablero();
+                                TableroActualizado?.Invoke();
                             }
                             else
                             {
-                             
-                                context.Response.StatusCode = 400;
-                                byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Formato de tarea inválido\"}");
-                                context.Response.ContentType = "application/json";
-                                context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
+                                contexto.Response.StatusCode = 400; 
+                                contexto.Response.Close();
+                                return;
                             }
                         }
-                        catch (JsonException)
+                    }
+                    contexto.Response.StatusCode = 200;
+                    contexto.Response.Close();
+                }
+               
+                else if (contexto.Request.HttpMethod == "POST" && contexto.Request.RawUrl == "/kanban/eliminar")
+                {
+                    byte[] bufferEntrada = new byte[contexto.Request.ContentLength64];
+                    contexto.Request.InputStream.Read(bufferEntrada, 0, bufferEntrada.Length);
+                    string json = Encoding.UTF8.GetString(bufferEntrada);
+
+                    var data = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+                    if (data != null && data.ContainsKey("id") && data.ContainsKey("usuario"))
+                    {
+                        int id = int.Parse(data["id"]);
+                        string usuario = data["usuario"];
+
+                        var tarea = _tablero.Tareas.FirstOrDefault(t => t.Id == id);
+                        if (tarea != null)
                         {
-                           
-                            context.Response.StatusCode = 400;
-                            byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"JSON inválido\"}");
-                            context.Response.ContentType = "application/json";
-                            context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
+                          
+                            if (tarea.Nombre != usuario)
+                            {
+                                contexto.Response.StatusCode = 403; 
+                                contexto.Response.Close();
+                                return;
+                            }
+
+                            _tablero.Tareas.Remove(tarea);
+                            GuardarTablero();
+                            TableroActualizado?.Invoke();
+                        }
+                    }
+                    contexto.Response.StatusCode = 200;
+                    contexto.Response.Close();
+                }
+               
+                else if (contexto.Request.HttpMethod == "POST" && contexto.Request.RawUrl == "/kanban/editar")
+                {
+                    byte[] bufferEntrada = new byte[contexto.Request.ContentLength64];
+                    contexto.Request.InputStream.Read(bufferEntrada, 0, bufferEntrada.Length);
+                    string json = Encoding.UTF8.GetString(bufferEntrada);
+
+                    var data = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+                    if (data != null && data.ContainsKey("id") && data.ContainsKey("titulo") &&
+                        data.ContainsKey("descripcion") && data.ContainsKey("usuario"))
+                    {
+                        int id = int.Parse(data["id"]);
+                        string titulo = data["titulo"];
+                        string descripcion = data["descripcion"];
+                        string usuario = data["usuario"];
+
+                      
+                        if (string.IsNullOrWhiteSpace(titulo) || titulo.Length > 50 ||
+                            string.IsNullOrWhiteSpace(descripcion) || descripcion.Length > 100)
+                        {
+                            contexto.Response.StatusCode = 400;
+                            contexto.Response.Close();
+                            return;
                         }
 
-                        context.Response.Close();
+                        var tarea = _tablero.Tareas.FirstOrDefault(t => t.Id == id);
+                        if (tarea != null)
+                        {
+                           
+                            if (tarea.Nombre != usuario)
+                            {
+                                contexto.Response.StatusCode = 403; 
+                                contexto.Response.Close();
+                                return;
+                            }
+
+                            tarea.Titulo = titulo;
+                            tarea.Descripcion = descripcion;
+                            GuardarTablero();
+                            TableroActualizado?.Invoke();
+                        }
                     }
-                    //else if (path == "/tablero/cambio-estado")
-                    //{
-                       
-                    //    using StreamReader reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
-                    //    string json = reader.ReadToEnd();
-
-                    //    try
-                    //    {
-                    //        using JsonDocument doc = JsonDocument.Parse(json);
-                    //        JsonElement root = doc.RootElement;
-
-                    //        if (root.TryGetProperty("Titulo", out JsonElement tareaElement) &&
-                    //            root.TryGetProperty("Estado", out JsonElement estadoAnteriorElement))
-                    //        {
-                    //            ToDoDTO tarea = JsonSerializer.Deserialize<ToDoDTO>(tareaElement.GetRawText());
-                    //            int estadoAnterior = estadoAnteriorElement.GetInt32();
-
-                              
-                    //            TareaCambiada?.Invoke(tarea, estadoAnterior);
-
-                                
-                    //            byte[] respuesta = Encoding.UTF8.GetBytes("{\"success\": true}");
-                    //            context.Response.StatusCode = 200;
-                    //            context.Response.ContentType = "application/json";
-                    //            context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
-                    //        }
-                    //        else
-                    //        {
-                                
-                    //            context.Response.StatusCode = 400;
-                    //            byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Formato de datos inválido\"}");
-                    //            context.Response.ContentType = "application/json";
-                    //            context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
-                    //        }
-                    //    }
-                    //    catch (Exception)
-                    //    {
-                        
-                    //        context.Response.StatusCode = 400;
-                    //        byte[] respuesta = Encoding.UTF8.GetBytes("{\"error\": \"Error al procesar los datos\"}");
-                    //        context.Response.ContentType = "application/json";
-                    //        context.Response.OutputStream.Write(respuesta, 0, respuesta.Length);
-                    //    }
-                    //    context.Response.Close();
-                    //}
-                    else
-                    {
-                       
-                        context.Response.StatusCode = 404;
-                        context.Response.Close();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine($"Error al procesar la solicitud: {ex.Message}");
-
-                try
-                {
-                    context.Response.StatusCode = 500;
-                    context.Response.Close();
-                }
-                catch
-                {
-                    
-                }
-            }
-        }
-        private void ServirArchivoEstatico(HttpListenerContext contexto, string nombreArchivo, string contentType)
-        {
-            try
-            {
-                string rutaArchivo = Path.Combine(assetsPath, nombreArchivo);
-
-                if (File.Exists(rutaArchivo))
-                {
-                    byte[] contenido = File.ReadAllBytes(rutaArchivo);
-                    contexto.Response.ContentLength64 = contenido.Length;
-                    contexto.Response.ContentType = contentType;
-                    contexto.Response.OutputStream.Write(contenido, 0, contenido.Length);
                     contexto.Response.StatusCode = 200;
+                    contexto.Response.Close();
                 }
                 else
                 {
                     contexto.Response.StatusCode = 404;
+                    contexto.Response.Close();
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al servir archivo estático: {ex.Message}");
-                contexto.Response.StatusCode = 500;
-            }
-
-            contexto.Response.Close();
         }
     }
-
 }

@@ -18,15 +18,10 @@ namespace TableroKanbanHTTP
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly TableroKanbanServer server;
-        private readonly DatosTableroViewModel viewModel;
+       
         public MainWindow()
         {
             InitializeComponent();
-            server = new TableroKanbanServer();
-            viewModel =new DatosTableroViewModel(server);
-            DataContext = viewModel;
-
         }
     }
 }

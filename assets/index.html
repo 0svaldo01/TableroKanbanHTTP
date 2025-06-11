@@ -1,287 +1,374 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tablero Kanban</title>
+    <meta charset="UTF-8" />
+    <title>Mi Kanban</title>
     <style>
-        * {
-            padding: 0;
+        body {
             margin: 0;
-            box-sizing: border-box;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            background-color: rgba(0, 0, 0, 0.5);
+            background-blend-mode: overlay;
         }
 
-        *::-webkit-scrollbar {
-            display: none;
-        }
-
-        .board {
-            width: 100%;
-            height: 100vh;
-            overflow: scroll;
-            background-image: url(https://plus.unsplash.com/premium_photo-1674805594619-8ca8ad1ef3c5?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
-            background-position: center;
-            background-size: cover;
-        }
-
-        #todo-form {
-            padding: 32px 32px 0;
+        .kanban-board {
             display: flex;
-            gap: 12px;
+            justify-content: space-around;
+            padding: 20px;
+            min-height: 80vh;
         }
 
-            #todo-form input {
-                padding: 12px;
-                width: 225px;
-                border-radius: 8px;
-                border: 2px solid #6A0DAD;
-                background: #E6E6FA;
-                color: black;
-                font-weight: bold;
-                font-size: 14px;
-                outline: none;
+        .column {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            width: 30%;
+            padding: 10px;
+        }
+
+            .column h2 {
+                text-align: center;
+                color: #2c3e50;
             }
 
-            #todo-form button {
-                padding: 12px;
-                border-radius: 8px;
-                border: 2px solid black;
-                background: #6A0DAD;
+        .task {
+            background-color: #dfe6e9;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: grab;
+        }
+
+        .task-buttons {
+            margin-top: 5px;
+            text-align: right;
+        }
+
+            .task-buttons button {
+                margin-left: 5px;
+                background-color: #bdc3c7;
+                border: none;
+                padding: 4px 8px;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .header input {
+                padding: 6px;
+                border-radius: 4px;
+                border: none;
+            }
+
+            .header button {
+                padding: 6px 14px;
+                background-color: #2980b9;
                 color: white;
-                font-weight: bold;
-                font-size: 14px;
+                border: none;
+                border-radius: 5px;
                 cursor: pointer;
             }
 
-        .lanes {
-            display: flex;
-            align-items: flex-start;
-            justify-content: start;
-            gap: 20px;
-            padding: 24px 32px;
-            overflow-x: auto;
-            height: 100%;
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
         }
 
-        .heading {
-            font-size: 24px;
-            font-weight: bold;
-            color: #6A0DAD;
-            text-align: center;
-            margin-bottom: 8px;
-        }
-
-        .swim-lane {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: #E6E6FA;
-            border: 3px solid #6A0DAD;
-            padding: 16px;
-            border-radius: 15px;
-            width: 250px;
-            min-height: 150px;
-            flex-shrink: 0;
-        }
-
-        .task {
+        .modal-content {
             background: white;
-            color: black;
-            border: 2px solid #D48AA1;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 16px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
-            cursor: move;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
         }
 
-        .is-dragging {
-            transform: scale(1.05);
-            background: #6A0DAD;
-            color: white;
-            border: 2px solid #D48AA1;
+            .modal-content input {
+                width: 80%;
+                padding: 10px;
+                margin-top: 10px;
+            }
+
+        .error-msg {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="board">
-        <form id="todo-form">
-            <div class="name-input-container">
-                <input type="text" required placeholder="Ingresa tu nombre" id="name-input" />
-                <input type="text" required placeholder="Nuevo TODO..." id="todo-input">
-                <button type="submit" id="send-button">Agregar</button>
-                <button type="button" id="unlock-button">Cambiar nombre</button>
-            </div>
-        </form>
-        <div class="lanes">
-            <div class="swim-lane" id="todo-lane" data-valor="1">
-                <h2 class="heading">TO DO</h2>
-            </div>
-            <div class="swim-lane" id="doing-lane" data-valor="2">
-                <h2 class="heading">DOING</h2>
-            </div>
-            <div class="swim-lane" id="done-lane" data-valor="3">
-                <h2 class="heading">DONE</h2>
+    <div class="header">
+        <div>
+            <input type="text" id="nombreUsuario" placeholder="Escribe tu nombre">
+            <button onclick="establecerNombre()">Establecer Nombre</button>
+            <button onclick="editarNombre()">Editar Nombre</button>
+        </div>
+        <button onclick="abrirModal()">+ Nueva Tarea</button>
+    </div>
+
+    <div class="kanban-board">
+        <div class="column" ondragover="allowDrop(event)" ondrop="drop(event, 'Pendiente')">
+            <h2>Pendiente</h2>
+            <div id="Pendiente"></div>
+        </div>
+        <div class="column" ondragover="allowDrop(event)" ondrop="drop(event, 'EnProceso')">
+            <h2>En Proceso</h2>
+            <div id="EnProceso"></div>
+        </div>
+        <div class="column" ondragover="allowDrop(event)" ondrop="drop(event, 'Terminado')">
+            <h2>Terminado</h2>
+            <div id="Terminado"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3 id="modal-titulo">Nueva Tarea</h3>
+            <input type="text" id="titulo" placeholder="Título (máx. 50 caracteres)" maxlength="50">
+            <input type="text" id="descripcion" placeholder="Descripción (máx. 100 caracteres)" maxlength="100">
+            <div id="error-msg" class="error-msg"></div>
+            <div style="text-align: center; margin-top: 10px;">
+                <button onclick="guardarTarea()">Guardar</button>
+                <button onclick="cerrarModal()">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
+        let tareas = [];
+        let editandoId = null;
+        let nombreActual = "";
 
-        const droppables = document.querySelectorAll(".swim-lane");
+        // Cargar datos del servidor
+        async function cargarTablero() {
+            try {
+                const response = await fetch('/kanban/tablero');
+                const data = await response.json();
+                tareas = data.Tareas || [];
+                renderizar();
+            } catch (error) {
+                console.error('Error al cargar tablero:', error);
+            }
+        }
 
-        const nameInput = document.getElementById("name-input");
-        const unlockButton = document.getElementById("unlock-button");
-        let nameLocked = false;
-        function setupDraggable(task) {
-            task.addEventListener("dragstart", () => {
-                task.classList.add("is-dragging");
-            });
+        function renderizar() {
+            ['Pendiente', 'EnProceso', 'Terminado'].forEach(col => {
+                const div = document.getElementById(col);
+                div.innerHTML = '';
 
-            task.addEventListener("dragend", async () => {
-                task.classList.remove("is-dragging");
+                tareas.filter(t => t.Estado === col).forEach(tarea => {
+                    const card = document.createElement('div');
+                    card.className = 'task';
 
-       
-                const newZone = task.parentElement;
+                    // Solo permitir drag si es el autor y no está terminado
+                    card.draggable = tarea.Nombre === nombreActual && col !== 'Terminado';
+                    card.ondragstart = e => e.dataTransfer.setData('id', tarea.Id);
 
-         
-                const taskText = task.innerText;
-                const parts = taskText.split(" - ");
-                const nombre = parts[0];
-                const titulo = parts.slice(1).join(" - ");
-
-               
-                let todo = {
-                    Nombre: nombre,
-                    Titulo: titulo,
-                    Estado: parseInt(newZone.getAttribute("data-valor"))
-                };
-
-
-                try {
-                    console.log("Enviando actualización:", todo);
-                    let response = await fetch("/tablero/tarea", {
-                        method: "POST",
-                        body: JSON.stringify(todo),
-                        headers: {
-                            "content-type": "application/json"
-                        }
-                    });
-                    console.log("Respuesta del servidor:", response);
-                } catch (ex) {
-                    console.log("Error al actualizar:", ex);
-                }
+                    card.innerHTML = `
+                <strong>#${tarea.Id} - ${tarea.Titulo}</strong><br>
+                <small>${tarea.Descripcion}</small><br>
+                <em>Autor: ${tarea.Nombre}</em>
+                <div class="task-buttons">
+                  ${(tarea.Nombre === nombreActual) ? `<button onclick="editarTarea(${tarea.Id})">✎</button>
+                  <button onclick="eliminarTarea(${tarea.Id})">🗑</button>` : ''}
+                </div>
+              `;
+                    div.appendChild(card);
+                });
             });
         }
 
-       
-        droppables.forEach((zone) => {
-            zone.addEventListener("dragover", (e) => {
-                e.preventDefault();
-                const bottomTask = insertAboveTask(zone, e.clientY);
-                const curTask = document.querySelector(".is-dragging");
+        function abrirModal() {
+            if (!nombreActual) return alert("Primero debes establecer tu nombre.");
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('titulo').value = '';
+            document.getElementById('descripcion').value = '';
+            document.getElementById('modal-titulo').innerText = 'Nueva Tarea';
+            document.getElementById('error-msg').innerText = '';
+            editandoId = null;
+        }
 
-                if (!bottomTask) {
-                    zone.appendChild(curTask);
-                } else {
-                    zone.insertBefore(curTask, bottomTask);
-                }
-            });
-        });
+        function cerrarModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
 
-        const insertAboveTask = (zone, mouseY) => {
-            const els = zone.querySelectorAll(".task:not(.is-dragging)");
-            let closestTask = null;
-            let closestOffset = Number.NEGATIVE_INFINITY;
+        async function guardarTarea() {
+            const titulo = document.getElementById('titulo').value.trim();
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const errorDiv = document.getElementById('error-msg');
 
-            els.forEach((task) => {
-                const { top } = task.getBoundingClientRect();
-                const offset = mouseY - top;
-
-                if (offset < 0 && offset > closestOffset) {
-                    closestOffset = offset;
-                    closestTask = task;
-                }
-            });
-
-            return closestTask;
-        };
-
-
-        const form = document.getElementById("todo-form");
-        const input = document.getElementById("todo-input");
-        const inputname = document.getElementById("name-input");
-        const todoLane = document.getElementById("todo-lane");
-
-        unlockButton.addEventListener("click", () => {
-            nameInput.disabled = false;
-            unlockButton.style.display = 'none';
-            nameLocked = false;
-            nameInput.focus();
-
-            document.querySelectorAll(".task").forEach(task => task.remove());
-        });
-
-        form.addEventListener("submit", async (e) => {
-        
-            e.preventDefault();
-
-            const nombre = inputname.value;
-            const value = input.value;
-
-            if (!value || !nombre) return;
-
-            if (document.forms[0].checkValidity()) {
-                
-                if (!nameLocked) {
-                    nameInput.disabled = true;
-                    unlockButton.style.display = 'block';
-                    nameLocked = true;
-                }
-            
-
-                const newTask = document.createElement("p");
-                newTask.classList.add("task");
-                newTask.setAttribute("draggable", "true");
-                newTask.innerText = nombre + " - " + value;
-
-                setupDraggable(newTask);
-                todoLane.appendChild(newTask);
-
-                let todo = {
-                    Nombre: nombre,
-                    Titulo: value,
-                    Estado: parseInt(todoLane.getAttribute("data-valor"))
-                };
-
-                try {
-                    console.log("Enviando nueva tarea:", todo);
-                    let response = await fetch("/tablero/tarea", {
-                        method: "POST",
-                        body: JSON.stringify(todo),
-                        headers: {
-                            "content-type": "application/json"
-                        }
-                    });
-                    console.log("Respuesta del servidor:", response);
-                } catch (ex) {
-                    console.log("Error al crear tarea:", ex);
-                }
-
-                input.value = "";
-            } else {
-                document.forms[0].reportValidity();
+            // Validaciones
+            if (!titulo || titulo.length > 50) {
+                errorDiv.innerText = "El título es requerido y no puede exceder 50 caracteres";
+                return;
             }
-        });
+            if (!descripcion || descripcion.length > 100) {
+                errorDiv.innerText = "La descripción es requerida y no puede exceder 100 caracteres";
+                return;
+            }
 
-        document.querySelectorAll(".task").forEach(task => {
-            setupDraggable(task);
-        });
+            try {
+                if (editandoId) {
+                    // Editar tarea existente
+                    const response = await fetch('/kanban/editar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: editandoId.toString(),
+                            titulo: titulo,
+                            descripcion: descripcion,
+                            usuario: nombreActual
+                        })
+                    });
 
-  
+                    if (response.status === 403) {
+                        alert("No tienes permisos para editar esta tarea");
+                        return;
+                    }
+                    if (response.status === 400) {
+                        errorDiv.innerText = "Datos inválidos";
+                        return;
+                    }
+                } else {
+                    // Crear nueva tarea
+                    const response = await fetch('/kanban/agregar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            Titulo: titulo,
+                            Descripcion: descripcion,
+                            Nombre: nombreActual
+                        })
+                    });
 
+                    if (response.status === 400) {
+                        errorDiv.innerText = "Datos inválidos";
+                        return;
+                    }
+                }
+
+                await cargarTablero();
+                cerrarModal();
+            } catch (error) {
+                console.error('Error al guardar tarea:', error);
+                errorDiv.innerText = "Error al guardar la tarea";
+            }
+        }
+
+        function editarTarea(id) {
+            const tarea = tareas.find(t => t.Id === id);
+            if (tarea.Nombre !== nombreActual) return;
+
+            document.getElementById('titulo').value = tarea.Titulo;
+            document.getElementById('descripcion').value = tarea.Descripcion;
+            document.getElementById('modal-titulo').innerText = 'Editar Tarea';
+            document.getElementById('error-msg').innerText = '';
+            editandoId = id;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        async function eliminarTarea(id) {
+            const tarea = tareas.find(t => t.Id === id);
+            if (tarea.Nombre !== nombreActual) return;
+
+            if (confirm("¿Estás seguro de eliminar esta tarea?")) {
+                try {
+                    const response = await fetch('/kanban/eliminar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: id.toString(),
+                            usuario: nombreActual
+                        })
+                    });
+
+                    if (response.status === 403) {
+                        alert("No tienes permisos para eliminar esta tarea");
+                        return;
+                    }
+
+                    await cargarTablero();
+                } catch (error) {
+                    console.error('Error al eliminar tarea:', error);
+                }
+            }
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        async function drop(ev, nuevoEstado) {
+            ev.preventDefault();
+            const id = parseInt(ev.dataTransfer.getData('id'));
+            const tarea = tareas.find(t => t.Id === id);
+
+            if (!tarea || tarea.Nombre !== nombreActual) {
+                alert("No puedes mover esta tarea.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/kanban/mover', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: id.toString(),
+                        estado: nuevoEstado,
+                        usuario: nombreActual
+                    })
+                });
+
+                if (response.status === 403) {
+                    alert("No tienes permisos para mover esta tarea");
+                    return;
+                }
+                if (response.status === 400) {
+                    alert("No puedes mover la tarea hacia atrás o saltar estados");
+                    return;
+                }
+
+                await cargarTablero();
+            } catch (error) {
+                console.error('Error al mover tarea:', error);
+            }
+        }
+
+        function establecerNombre() {
+            const input = document.getElementById('nombreUsuario');
+            if (!input.value.trim()) return alert("Ingresa un nombre válido");
+            if (nombreActual && nombreActual !== input.value.trim()) return alert("Ya se ha establecido otro nombre. Usa el botón de edición.");
+            nombreActual = input.value.trim();
+            input.disabled = true;
+        }
+
+        function editarNombre() {
+            const input = document.getElementById('nombreUsuario');
+            const nuevo = input.value.trim();
+            if (nuevo === nombreActual) {
+                input.disabled = false;
+                nombreActual = "";
+            } else {
+                alert("Solo puedes editar si el nombre coincide con el actual.");
+            }
+        }
+
+        // Cargar datos al iniciar y cada 3 segundos
+        cargarTablero();
+        setInterval(cargarTablero, 3000);
     </script>
 </body>
 </html>
