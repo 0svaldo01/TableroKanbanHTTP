@@ -114,9 +114,9 @@
         <div>
             <input type="text" id="nombreUsuario" placeholder="Escribe tu nombre">
             <button onclick="establecerNombre()">Establecer Nombre</button>
-            <button onclick="editarNombre()">Editar Nombre</button>
+            <button onclick="editarNombre()">Cambiar Nombre</button>
         </div>
-        <button onclick="abrirModal()">+ Nueva Tarea</button>
+        <button onclick="abrirModal()">+ Agregar Tarea</button>
     </div>
 
     <div class="kanban-board">
@@ -138,7 +138,7 @@
         <div class="modal-content">
             <h3 id="modal-titulo">Nueva Tarea</h3>
             <input type="text" id="titulo" placeholder="Título (máx. 50 caracteres)" maxlength="50">
-            <input type="text" id="descripcion" placeholder="Descripción (máx. 100 caracteres)" maxlength="100">
+            <input type="text" id="descripcion" placeholder="Escribe una descripción" maxlength="50">
             <div id="error-msg" class="error-msg"></div>
             <div style="text-align: center; margin-top: 10px;">
                 <button onclick="guardarTarea()">Guardar</button>
@@ -182,8 +182,8 @@
                 <small>${tarea.Descripcion}</small><br>
                 <em>Autor: ${tarea.Nombre}</em>
                 <div class="task-buttons">
-                  ${(tarea.Nombre === nombreActual) ? `<button onclick="editarTarea(${tarea.Id})">✎</button>
-                  <button onclick="eliminarTarea(${tarea.Id})">🗑</button>` : ''}
+                  ${(tarea.Nombre === nombreActual) ? `<button onclick="editarTarea(${tarea.Id})">✏️</button>
+                  <button onclick="eliminarTarea(${tarea.Id})">🗑️</button>` : ''}
                 </div>
               `;
                     div.appendChild(card);
