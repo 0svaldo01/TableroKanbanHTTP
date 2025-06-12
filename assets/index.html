@@ -36,11 +36,59 @@
             padding: 10px;
             margin-bottom: 10px;
             cursor: grab;
+            /* Nuevas propiedades para ajuste automático */
+            width: 100%;
+            box-sizing: border-box;
+            min-height: fit-content;
+            display: flex;
+            flex-direction: column;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Estilos para el contenido de la tarea */
+        .task-content {
+            flex: 1;
+            margin-bottom: 5px;
+        }
+
+        .task-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.3;
+            /* Limitar título a 1 línea máximo */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.2;
+            /* Limitar a máximo 3 líneas para mantener diseño consistente */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .task-author {
+            font-style: italic;
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
         }
 
         .task-buttons {
-            margin-top: 5px;
+            margin-top: auto;
             text-align: right;
+            padding-top: 5px;
         }
 
             .task-buttons button {
@@ -50,7 +98,13 @@
                 padding: 4px 8px;
                 cursor: pointer;
                 border-radius: 4px;
+                font-size: 12px;
+                transition: background-color 0.2s;
             }
+
+                .task-buttons button:hover {
+                    background-color: #95a5a6;
+                }
 
         .header {
             background-color: #34495e;
@@ -107,6 +161,14 @@
             font-size: 12px;
             margin-top: 5px;
         }
+
+        /* Contador de caracteres */
+        .char-counter {
+            font-size: 11px;
+            color: #888;
+            text-align: right;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -137,8 +199,10 @@
     <div class="modal" id="modal">
         <div class="modal-content">
             <h3 id="modal-titulo">Nueva Tarea</h3>
-            <input type="text" id="titulo" placeholder="Título (máx. 50 caracteres)" maxlength="50">
-            <input type="text" id="descripcion" placeholder="Escribe una descripción" maxlength="50">
+            <input type="text" id="titulo" placeholder="Título (máx. 20 caracteres)" maxlength="20" oninput="updateCharCounter('titulo', 20)">
+            <div class="char-counter" id="titulo-counter">0/20</div>
+            <input type="text" id="descripcion" placeholder="Escribe una descripción (máx. 100 caracteres)" maxlength="100" oninput="updateCharCounter('descripcion', 150)">
+            <div class="char-counter" id="descripcion-counter">0/100</div>
             <div id="error-msg" class="error-msg"></div>
             <div style="text-align: center; margin-top: 10px;">
                 <button onclick="guardarTarea()">Guardar</button>
@@ -152,7 +216,21 @@
         let editandoId = null;
         let nombreActual = "";
 
-       
+        // Función para actualizar contador de caracteres
+        function updateCharCounter(inputId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(inputId + '-counter');
+            const currentLength = input.value.length;
+            counter.textContent = `${currentLength}/${maxLength}`;
+
+            // Cambiar color si se acerca al límite
+            if (currentLength > maxLength * 0.8) {
+                counter.style.color = '#e74c3c';
+            } else {
+                counter.style.color = '#888';
+            }
+        }
+
         async function cargarTablero() {
             try {
                 const response = await fetch('/kanban/tablero');
@@ -173,19 +251,25 @@
                     const card = document.createElement('div');
                     card.className = 'task';
 
-                   
                     card.draggable = tarea.Nombre === nombreActual && col !== 'Terminado';
                     card.ondragstart = e => e.dataTransfer.setData('id', tarea.Id);
 
+                   
+                    const descripcionTruncada = tarea.Descripcion.length > 100
+                        ? tarea.Descripcion.substring(0, 100) + '...'
+                        : tarea.Descripcion;
+
                     card.innerHTML = `
-                <strong>#${tarea.Id} - ${tarea.Titulo}</strong><br>
-                <small>${tarea.Descripcion}</small><br>
-                <em>Autor: ${tarea.Nombre}</em>
-                <div class="task-buttons">
-                  ${(tarea.Nombre === nombreActual) ? `<button onclick="editarTarea(${tarea.Id})">✏️</button>
-                  <button onclick="eliminarTarea(${tarea.Id})">🗑️</button>` : ''}
-                </div>
-              `;
+                            <div class="task-content">
+                                <div class="task-title">#${tarea.Id} - ${tarea.Titulo}</div>
+                                <div class="task-description">${descripcionTruncada}</div>
+                                <div class="task-author">Autor: ${tarea.Nombre}</div>
+                            </div>
+                            <div class="task-buttons">
+                                ${(tarea.Nombre === nombreActual) ? `<button onclick="editarTarea(${tarea.Id})">✏️</button>
+                                <button onclick="eliminarTarea(${tarea.Id})">🗑️</button>` : ''}
+                            </div>
+                        `;
                     div.appendChild(card);
                 });
             });
@@ -198,6 +282,8 @@
             document.getElementById('descripcion').value = '';
             document.getElementById('modal-titulo').innerText = 'Nueva Tarea';
             document.getElementById('error-msg').innerText = '';
+            updateCharCounter('titulo', 20);
+            updateCharCounter('descripcion', 100);
             editandoId = null;
         }
 
@@ -210,19 +296,17 @@
             const descripcion = document.getElementById('descripcion').value.trim();
             const errorDiv = document.getElementById('error-msg');
 
-         
-            if (!titulo || titulo.length > 50) {
-                errorDiv.innerText = "El título es requerido y no puede exceder 50 caracteres";
+            if (!titulo || titulo.length > 20) {
+                errorDiv.innerText = "El título es requerido y no puede exceder 20 caracteres";
                 return;
             }
             if (!descripcion || descripcion.length > 100) {
-                errorDiv.innerText = "La descripción es requerida y no puede exceder 100 caracteres";
+                errorDiv.innerText = "La descripción es requerida y no puede exceder 150 caracteres";
                 return;
             }
 
             try {
                 if (editandoId) {
-                    
                     const response = await fetch('/kanban/editar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -243,7 +327,6 @@
                         return;
                     }
                 } else {
-                    
                     const response = await fetch('/kanban/agregar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -276,6 +359,8 @@
             document.getElementById('descripcion').value = tarea.Descripcion;
             document.getElementById('modal-titulo').innerText = 'Editar Tarea';
             document.getElementById('error-msg').innerText = '';
+            updateCharCounter('titulo', 20);
+            updateCharCounter('descripcion', 100);
             editandoId = id;
             document.getElementById('modal').style.display = 'flex';
         }
@@ -366,7 +451,6 @@
             }
         }
 
-      
         cargarTablero();
         setInterval(cargarTablero, 500);
     </script>
