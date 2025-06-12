@@ -36,7 +36,7 @@
             padding: 10px;
             margin-bottom: 10px;
             cursor: grab;
-            /* Nuevas propiedades para ajuste automático */
+            
             width: 100%;
             box-sizing: border-box;
             min-height: fit-content;
@@ -46,7 +46,7 @@
             overflow-wrap: break-word;
         }
 
-        /* Estilos para el contenido de la tarea */
+       
         .task-content {
             flex: 1;
             margin-bottom: 5px;
@@ -58,7 +58,7 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
             line-height: 1.3;
-            /* Limitar título a 1 línea máximo */
+            
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -71,7 +71,7 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
             line-height: 1.2;
-            /* Limitar a máximo 3 líneas para mantener diseño consistente */
+            
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
@@ -162,7 +162,7 @@
             margin-top: 5px;
         }
 
-        /* Contador de caracteres */
+        
         .char-counter {
             font-size: 11px;
             color: #888;
@@ -216,14 +216,14 @@
         let editandoId = null;
         let nombreActual = "";
 
-        // Función para actualizar contador de caracteres
+       
         function updateCharCounter(inputId, maxLength) {
             const input = document.getElementById(inputId);
             const counter = document.getElementById(inputId + '-counter');
             const currentLength = input.value.length;
             counter.textContent = `${currentLength}/${maxLength}`;
 
-            // Cambiar color si se acerca al límite
+           
             if (currentLength > maxLength * 0.8) {
                 counter.style.color = '#e74c3c';
             } else {
